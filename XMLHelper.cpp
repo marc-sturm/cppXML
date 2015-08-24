@@ -5,6 +5,26 @@
 #include <QXmlSchema>
 #include <QUrl>
 #include <QTemporaryFile>
+#include <QXmlSimpleReader>
+#include <QXmlInputSource>
+
+QString XmlHelper::isValidXml(QString xml_file)
+{
+	QXmlSimpleReader xmlReader;
+
+	XmlValidationMessageHandler2 handler;
+	xmlReader.setContentHandler(&handler);
+	xmlReader.setErrorHandler(&handler);
+
+	QFile file(xml_file);
+	QXmlInputSource source(&file);
+
+	if (!xmlReader.parse(&source))
+	{
+		return handler.errorString();
+	}
+	return "";
+}
 
 QString XmlHelper::isValidXml(QString xml_name, QString schema_name)
 {
