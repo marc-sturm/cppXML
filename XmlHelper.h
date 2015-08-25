@@ -26,7 +26,7 @@ private:
             QString messages();
 
     protected:
-            void handleMessage(QtMsgType type, const QString& description, const QUrl& identifier, const QSourceLocation& sourceLocation) override;
+            void handleMessage(QtMsgType type, const QString& description, const QUrl& identifier, const QSourceLocation& sourceLocation);
             QString messages_;
     };
 
@@ -36,18 +36,18 @@ private:
         : public QXmlDefaultHandler
     {
     public:
-            QString errorString() override
+            QString errorString()
             {
                 return error_;
             }
 
     protected:
-            bool error(const QXmlParseException& e) override
+            bool error(const QXmlParseException& e) 
             {
                 error_ = "Error in line " + QString::number(e.lineNumber()) + ": " + e.message();
                 return false;
             }
-            bool fatalError(const QXmlParseException& e) override
+            bool fatalError(const QXmlParseException& e) 
             {
                 error_ = "Fatal error in line " + QString::number(e.lineNumber()) + ": " + e.message();
                 return false;
