@@ -51,7 +51,7 @@ QString XmlHelper::isValidXml(QString xml_name, QString schema_name)
 	QXmlSchemaValidator validator(schema);
 	XmlValidationMessageHandler handler;
 	validator.setMessageHandler(&handler);
-	QScopedPointer<QFile> xml_file(Helper::openFileForReading(xml_name));
+	QSharedPointer<QFile> xml_file = Helper::openFileForReading(xml_name);
 	if (validator.validate(xml_file.data(), schema_url))
 	{
 		return "";
