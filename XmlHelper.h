@@ -34,9 +34,9 @@ private:
     ///XML validation message handler without schema.
     class XmlValidationMessageHandler2
         : public QXmlDefaultHandler
-    {
+	{
     public:
-            QString errorString()
+			QString errorString() const
             {
                 return error_;
             }
