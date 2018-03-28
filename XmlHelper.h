@@ -57,7 +57,7 @@ private:
     };
 
     //declared away
-    XmlHelper();
+    XmlHelper() = delete;
 };
 
 #endif
