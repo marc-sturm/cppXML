@@ -36,7 +36,7 @@ private:
         : public QXmlDefaultHandler
 	{
     public:
-            QString errorString()
+            QString errorString() const
             {
                 return error_;
             }
