@@ -21,6 +21,9 @@ DESTDIR = ../../bin/
 INCLUDEPATH += $$PWD/../cppCORE
 LIBS += -L$$PWD/../../bin -lcppCORE
 
+#make the executable search for .so-files in the same folder under linux
+QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
+
 HEADERS += XMLHelper.h \
 
 SOURCES += XMLHelper.cpp \
