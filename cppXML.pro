@@ -3,7 +3,7 @@ CONFIG += c++11
 
 #base settings
 QT       -= gui
-QT       += gui xml xmlpatterns
+QT       += xml xmlpatterns
 TEMPLATE = lib
 TARGET = cppXML
 DEFINES += CPPXML_LIBRARY
