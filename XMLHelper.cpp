@@ -26,18 +26,18 @@ QString XmlHelper::isValidXml(QString xml_file)
 	return "";
 }
 
-QString XmlHelper::isValidXml(QString xml_name, QString schema_name)
+QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
 {
 	//create schema url (both for native files and files from resources)
 	QUrl schema_url;
-	QScopedPointer<QTemporaryFile> tmp_file(QTemporaryFile::createNativeFile(schema_name));
-	if (tmp_file!=0)
+	QScopedPointer<QTemporaryFile> tmp_file(QTemporaryFile::createNativeFile(schema_file));
+	if (!tmp_file.isNull())
 	{
 		schema_url = QUrl::fromLocalFile(tmp_file->fileName());
 	}
 	else
 	{
-		schema_url = QUrl::fromLocalFile(schema_name);
+		schema_url = QUrl::fromLocalFile(schema_file);
 	}
 
 	//load schema
