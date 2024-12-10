@@ -7,6 +7,8 @@
 #include <QTemporaryFile>
 #include <QXmlSimpleReader>
 #include <QXmlInputSource>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
 QString XmlHelper::isValidXml(QString xml_file)
 {
@@ -58,6 +60,25 @@ QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
 	}
 
 	return handler.messages();
+}
+
+QString XmlHelper::format(QString xml)
+{
+	QString xml_out;
+	QXmlStreamReader reader(xml);
+	QXmlStreamWriter writer(&xml_out);
+	writer.setAutoFormatting(true);
+
+	while (!reader.atEnd())
+	{
+		reader.readNext();
+		if (!reader.isWhitespace())
+		{
+			writer.writeCurrentToken(reader);
+		}
+	}
+
+	return xml_out;
 }
 
 QString XmlHelper::XmlValidationMessageHandler::messages()

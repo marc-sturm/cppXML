@@ -16,6 +16,8 @@ public:
     ///Returns an empty string if the xml file validates against the schema, or the error message otherwise. Throws an Exception if the schema/xml file are not ok.
     static QString isValidXml(QString xml_file, QString schema_file);
 
+	///Format XML to make it human-readable
+	static QString format(QString xml);
 
 private:
     ///XML validation message handler with schema.
