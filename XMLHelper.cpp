@@ -1,31 +1,35 @@
 #include "XmlHelper.h"
-#include "Exceptions.h"
 #include "Helper.h"
 #include <QXmlSchemaValidator>
 #include <QXmlSchema>
 #include <QUrl>
 #include <QTemporaryFile>
-#include <QXmlSimpleReader>
-#include <QXmlInputSource>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
 QString XmlHelper::isValidXml(QString xml_file)
 {
-	QXmlSimpleReader xmlReader;
+    QFile file(xml_file);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return QString("Error while opening the file '%1'").arg(xml_file);
+    }
 
-	XmlValidationMessageHandler2 handler;
-	xmlReader.setContentHandler(&handler);
-	xmlReader.setErrorHandler(&handler);
+    QXmlStreamReader xmlReader(&file);
+    while (!xmlReader.atEnd() && !xmlReader.hasError())
+    {
+        xmlReader.readNext();
+    }
 
-	QFile file(xml_file);
-	QXmlInputSource source(&file);
+    if (xmlReader.hasError())
+    {
+        return QString("XML Parsing Error: %1 at line %2, column %3")
+        .arg(xmlReader.errorString())
+            .arg(xmlReader.lineNumber())
+            .arg(xmlReader.columnNumber());
+    }
 
-	if (!xmlReader.parse(&source))
-	{
-		return handler.errorString();
-	}
-	return "";
+    return "";
 }
 
 QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
