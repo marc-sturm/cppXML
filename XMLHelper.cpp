@@ -6,6 +6,7 @@
 #include <QTemporaryFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+#include <QDomDocument>
 
 QString XmlHelper::isValidXml(QString xml_file)
 {
@@ -13,6 +14,19 @@ QString XmlHelper::isValidXml(QString xml_file)
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         return QString("Error while opening the file '%1'").arg(xml_file);
+    }
+
+    if (xml_file.endsWith("html", Qt::CaseInsensitive))
+    {
+        QDomDocument doc;
+        if (!doc.setContent(&file))
+        {
+            return "Failed to parse HTML as XML";
+        } else
+        {
+           return "";
+        }
+        file.close();
     }
 
     QXmlStreamReader xmlReader(&file);
