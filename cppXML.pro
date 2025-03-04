@@ -3,7 +3,7 @@ CONFIG += c++11
 
 #base settings
 QT       -= gui
-QT       += xml xmlpatterns
+QT       += xml network
 TEMPLATE = lib
 TARGET = cppXML
 DEFINES += CPPXML_LIBRARY
@@ -21,10 +21,16 @@ DESTDIR = ../../bin/
 INCLUDEPATH += $$PWD/../cppCORE
 LIBS += -L$$PWD/../../bin -lcppCORE
 
+win32: INCLUDEPATH += $$PWD/../../libxml2/include/
+win32: LIBS += -L$$PWD/../../libxml2/.libs/ -lxml2
+win32: DEPENDPATH += $$PWD/../../libxml2/.libs/
+
+unix: QMAKE_CXXFLAGS += $$system(pkg-config --cflags libxml-2.0)
+unix: LIBS += -lxml2
+
 #make the executable search for .so-files in the same folder under linux
 QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
 
 HEADERS += XMLHelper.h \
 
 SOURCES += XMLHelper.cpp \
-
