@@ -21,8 +21,8 @@ DESTDIR = ../../bin/
 INCLUDEPATH += $$PWD/../cppCORE
 LIBS += -L$$PWD/../../bin -lcppCORE
 
-INCLUDEPATH += /usr/include/libxml2
-
+INCLUDEPATH += $$PWD/../../libxml2/include/
+# LIBS += $$PWD/../../libxml2/.libs -lxml2
 
 LIBS += -lxml2
 

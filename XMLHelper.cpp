@@ -1,7 +1,6 @@
 #include "XmlHelper.h"
 #include "Helper.h"
-// #include <QXmlSchemaValidator>
-// #include <QXmlSchema>
+
 #include <QUrl>
 #include <QTemporaryFile>
 #include <QXmlStreamReader>
@@ -56,41 +55,7 @@ QString XmlHelper::isValidXml(QString xml_file)
 
 QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
 {
-    // //create schema url (both for native files and files from resources)
-    // QUrl schema_url;
-    // QScopedPointer<QTemporaryFile> tmp_file(QTemporaryFile::createNativeFile(schema_file));
-    // if (!tmp_file.isNull())
-    // {
-    // 	schema_url = QUrl::fromLocalFile(tmp_file->fileName());
-    // }
-    // else
-    // {
-    // 	schema_url = QUrl::fromLocalFile(schema_file);
-    // }
-
-    // //load schema
-    // QXmlSchema schema;
-    // if (!schema.load(schema_url))
-    // {
-    // 	THROW(FileParseException, "XML schema '" + schema_url.toString() + "'  is not valid/present.");
-    // }
-
-    // //validate file
-    // QXmlSchemaValidator validator(schema);
-    // XmlValidationMessageHandler handler;
-    // validator.setMessageHandler(&handler);
-    // QSharedPointer<QFile> xml_file = Helper::openFileForReading(xml_name);
-    // if (validator.validate(xml_file.data(), schema_url))
-    // {
-    // 	return "";
-    // }
-
-    // return handler.messages();
-
-
-
-
-    //create schema url (both for native files and files from resources)
+    // create schema url (both for native files and files from resources)
     QUrl schema_url;
     QScopedPointer<QTemporaryFile> tmp_file(QTemporaryFile::createNativeFile(schema_file));
     if (!tmp_file.isNull()) {
@@ -99,7 +64,7 @@ QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
         schema_url = QUrl::fromLocalFile(schema_file);
     }
 
-    // Load the schema
+    // load the schema
     xmlSchemaParserCtxtPtr schemaParserCtxt = xmlSchemaNewParserCtxt(schema_url.toLocalFile().toUtf8().constData());
     if (!schemaParserCtxt) {
         return "Failed to create schema parser context.";
@@ -112,14 +77,14 @@ QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
         return "Failed to parse XSD schema: " + schema_url.toString();
     }
 
-    // Create validation context
+    // create validation context
     xmlSchemaValidCtxtPtr schemaValidCtxt = xmlSchemaNewValidCtxt(schema);
     if (!schemaValidCtxt) {
         xmlSchemaFree(schema);
         return "Failed to create schema validation context.";
     }
 
-    // Load the XML file
+    // load the XML file
     xmlDocPtr xmlDoc = xmlReadFile(xml_name.toUtf8().constData(), NULL, XML_PARSE_NONET);
     if (!xmlDoc) {
         xmlSchemaFreeValidCtxt(schemaValidCtxt);
@@ -127,16 +92,16 @@ QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
         return "Failed to parse XML file: " + xml_name;
     }
 
-    // Validate XML
+    // validate XML
     int validationResult = xmlSchemaValidateDoc(schemaValidCtxt, xmlDoc);
 
-    // Cleanup
+    // cleanup
     xmlFreeDoc(xmlDoc);
     xmlSchemaFreeValidCtxt(schemaValidCtxt);
     xmlSchemaFree(schema);
 
     if (validationResult == 0) {
-        return ""; // Validation successful
+        return ""; // validation successful, no errors found
     } else {
         return "XML validation failed against schema: " + schema_url.toString();
     }
@@ -160,13 +125,3 @@ QString XmlHelper::format(QString xml)
 
 	return xml_out;
 }
-
-// QString XmlHelper::XmlValidationMessageHandler::messages()
-// {
-// 	return messages_;
-// }
-
-// void XmlHelper::XmlValidationMessageHandler::handleMessage(QtMsgType /*type*/, const QString& description, const QUrl& /*identifier*/, const QSourceLocation& /*sourceLocation*/)
-// {
-// 	messages_ = messages_ + description + " ";
-// }
