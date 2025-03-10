@@ -21,9 +21,11 @@ DESTDIR = ../../bin/
 INCLUDEPATH += $$PWD/../cppCORE
 LIBS += -L$$PWD/../../bin -lcppCORE
 
-INCLUDEPATH += $$PWD/../../libxml2/include/
-LIBS += -L$$PWD/../../libxml2/.libs/ -lxml2
-DEPENDPATH += $$PWD/../../libxml2/.libs/
+win32: INCLUDEPATH += $$PWD/../../libxml2/include/
+win32: LIBS += -L$$PWD/../../libxml2/.libs/ -lxml2
+win32: DEPENDPATH += $$PWD/../../libxml2/.libs/
+
+unix: LIBS += -lxml2
 
 #make the executable search for .so-files in the same folder under linux
 QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
@@ -31,4 +33,3 @@ QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
 HEADERS += XMLHelper.h \
 
 SOURCES += XMLHelper.cpp \
-
