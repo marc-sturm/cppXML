@@ -22,9 +22,8 @@ INCLUDEPATH += $$PWD/../cppCORE
 LIBS += -L$$PWD/../../bin -lcppCORE
 
 INCLUDEPATH += $$PWD/../../libxml2/include/
-# LIBS += $$PWD/../../libxml2/.libs -lxml2
-
-LIBS += -lxml2
+LIBS += -L$$PWD/../../libxml2/.libs/ -lxml2
+DEPENDPATH += $$PWD/../../libxml2/.libs/
 
 #make the executable search for .so-files in the same folder under linux
 QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
