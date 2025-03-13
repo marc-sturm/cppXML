@@ -22,8 +22,7 @@ INCLUDEPATH += $$PWD/../cppCORE
 LIBS += -L$$PWD/../../bin -lcppCORE
 
 win32: INCLUDEPATH += $$PWD/../../libxml2/include/
-win32: LIBS += -L$$PWD/../../libxml2/.libs/ -lxml2
-win32: DEPENDPATH += $$PWD/../../libxml2/.libs/
+win32: LIBS += -L$$PWD/../../libxml2/libs/ -lxml2
 
 unix: QMAKE_CXXFLAGS += $$system(pkg-config --cflags libxml-2.0)
 unix: LIBS += -lxml2
