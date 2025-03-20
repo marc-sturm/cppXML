@@ -30,9 +30,9 @@ QString XmlHelper::isValidXml(QString xml_file)
         QTextStream stream(&file);
         QString html_content = stream.readAll();
         file.close();
-        #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         QRegularExpression regex("&[^;]+;"); // ignore special HTML characters
         QByteArray processed = html_content.replace(regex, "").toLatin1();
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         QDomDocument doc;
         QDomDocument::ParseOptions options = QDomDocument::ParseOption::Default;
         QDomDocument::ParseResult result = doc.setContent(processed, options);
@@ -55,7 +55,7 @@ QString XmlHelper::isValidXml(QString xml_file)
         int error_line = 0, error_column = 0;
 
         // Use the standard setContent() method
-        if (!doc.setContent(html_content, &error_message, &error_line, &error_column))
+        if (!doc.setContent(processed, &error_message, &error_line, &error_column))
         {
             file.close();
             return "Error parsing HTML at line " + QString::number(error_line) + ", column " + QString::number(error_column)+ ": " + error_message;
