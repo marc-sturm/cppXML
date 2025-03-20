@@ -27,11 +27,10 @@ QString XmlHelper::isValidXml(QString xml_file)
 
     if (xml_file.endsWith("html", Qt::CaseInsensitive))
     {
-        #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         QTextStream stream(&file);
         QString html_content = stream.readAll();
         file.close();
-
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         QRegularExpression regex("&[^;]+;"); // ignore special HTML characters
         QByteArray processed = html_content.replace(regex, "").toLatin1();
         QDomDocument doc;
