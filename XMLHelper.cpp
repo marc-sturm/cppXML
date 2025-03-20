@@ -29,11 +29,11 @@ QString XmlHelper::isValidXml(QString xml_file)
     {
         #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         QTextStream stream(&file);
-        QString htmlContent = stream.readAll();
+        QString html_content = stream.readAll();
         file.close();
 
         QRegularExpression regex("&[^;]+;"); // ignore special HTML characters
-        QByteArray processed = htmlContent.replace(regex, "").toLatin1();
+        QByteArray processed = html_content.replace(regex, "").toLatin1();
         QDomDocument doc;
         QDomDocument::ParseOptions options = QDomDocument::ParseOption::Default;
         QDomDocument::ParseResult result = doc.setContent(processed, options);
@@ -52,14 +52,19 @@ QString XmlHelper::isValidXml(QString xml_file)
         return "";
         #else
         QDomDocument doc;
-        if (!doc.setContent(&file))
+        QString error_message;
+        int error_line = 0, error_column = 0;
+
+        // Use the standard setContent() method
+        if (!doc.setContent(html_content, &error_message, &error_line, &error_column))
         {
-            return "Failed to parse HTML as XML";
-        } else
+            file.close();
+            return "Error parsing HTML at line " + QString::number(error_line) + ", column " + QString::number(error_column)+ ": " + error_message;
+        }
+        else
         {
             return "";
         }
-        file.close();
         #endif
     }
 
