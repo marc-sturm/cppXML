@@ -27,6 +27,7 @@ QString XmlHelper::isValidXml(QString xml_file)
 
     if (xml_file.endsWith("html", Qt::CaseInsensitive))
     {
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         QTextStream stream(&file);
         QString htmlContent = stream.readAll();
         file.close();
@@ -37,16 +38,29 @@ QString XmlHelper::isValidXml(QString xml_file)
         QDomDocument::ParseOptions options = QDomDocument::ParseOption::Default;
         QDomDocument::ParseResult result = doc.setContent(processed, options);
 
-        if (!result.errorMessage.isEmpty()) {
+        if (!result.errorMessage.isEmpty())
+        {
             return "Error parsing HTML at line " + QString::number(result.errorLine) + " column " + QString::number(result.errorColumn) + ": " + result.errorMessage;
         }
 
         QDomElement root = doc.documentElement();
-        if (root.isNull()) {
+        if (root.isNull())
+        {
             return "Invalid HTML: missing root element";
         }
 
         return "";
+        #else
+        QDomDocument doc;
+        if (!doc.setContent(&file))
+        {
+            return "Failed to parse HTML as XML";
+        } else
+        {
+            return "";
+        }
+        file.close();
+        #endif
     }
 
     QXmlStreamReader xmlReader(&file);
