@@ -5,7 +5,7 @@
 #include <QTemporaryFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <QDomDocument>
+#include <QTextStream>
 
 #include <iostream>
 #include <libxml/parser.h>
@@ -14,6 +14,8 @@
 #include <QScopedPointer>
 #include <QTemporaryFile>
 #include <QUrl>
+#include <QDomDocument>
+#include <QRegularExpression>
 
 QString XmlHelper::isValidXml(QString xml_file)
 {
@@ -25,15 +27,26 @@ QString XmlHelper::isValidXml(QString xml_file)
 
     if (xml_file.endsWith("html", Qt::CaseInsensitive))
     {
-        QDomDocument doc;
-        if (!doc.setContent(&file))
-        {
-            return "Failed to parse HTML as XML";
-        } else
-        {
-           return "";
-        }
+        QTextStream stream(&file);
+        QString htmlContent = stream.readAll();
         file.close();
+
+        QRegularExpression regex("&[^;]+;"); // ignore special HTML characters
+        QByteArray processed = htmlContent.replace(regex, "").toLatin1();
+        QDomDocument doc;
+        QDomDocument::ParseOptions options = QDomDocument::ParseOption::Default;
+        QDomDocument::ParseResult result = doc.setContent(processed, options);
+
+        if (!result.errorMessage.isEmpty()) {
+            return "Error parsing HTML at line " + QString::number(result.errorLine) + " column " + QString::number(result.errorColumn) + ": " + result.errorMessage;
+        }
+
+        QDomElement root = doc.documentElement();
+        if (root.isNull()) {
+            return "Invalid HTML: missing root element";
+        }
+
+        return "";
     }
 
     QXmlStreamReader xmlReader(&file);
@@ -44,12 +57,13 @@ QString XmlHelper::isValidXml(QString xml_file)
 
     if (xmlReader.hasError())
     {
-        return QString("XML Parsing Error: %1 at line %2, column %3")
+        file.close();
+        return QString("XML rarsing error: %1 at line %2, column %3")
         .arg(xmlReader.errorString())
             .arg(xmlReader.lineNumber())
             .arg(xmlReader.columnNumber());
     }
-
+    file.close();
     return "";
 }
 
