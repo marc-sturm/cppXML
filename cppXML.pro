@@ -15,11 +15,11 @@ QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE *= -O3
 
 #copy DLL to bin folder
-DESTDIR = ../../bin/
+DESTDIR = $$PWD/../build/bin/
 
 #include cppCORE library
 INCLUDEPATH += $$PWD/../cppCORE
-LIBS += -L$$PWD/../../bin -lcppCORE
+LIBS += -L$$PWD/../build/bin -lcppCORE
 
 win32: INCLUDEPATH += $$PWD/../../libxml2/include/
 win32: LIBS += -L$$PWD/../../libxml2/libs/ -lxml2
