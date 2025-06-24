@@ -25,6 +25,7 @@ QString XmlHelper::isValidXml(QString xml_file)
         return QString("Error while opening the file '%1'").arg(xml_file);
     }
 
+	//special handling for HTML
     if (xml_file.endsWith("html", Qt::CaseInsensitive))
     {
         QTextStream stream(&file);
@@ -76,7 +77,7 @@ QString XmlHelper::isValidXml(QString xml_file)
     if (xmlReader.hasError())
     {
         file.close();
-        return QString("XML rarsing error: %1 at line %2, column %3")
+		return QString("XML parsing error: %1 at line %2, column %3")
         .arg(xmlReader.errorString())
             .arg(xmlReader.lineNumber())
             .arg(xmlReader.columnNumber());
