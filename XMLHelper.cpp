@@ -6,16 +6,13 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QTextStream>
+#include <QScopedPointer>
+#include <QDomDocument>
+#include <QRegularExpression>
 
 #include <iostream>
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
-
-#include <QScopedPointer>
-#include <QTemporaryFile>
-#include <QUrl>
-#include <QDomDocument>
-#include <QRegularExpression>
 
 QString XmlHelper::isValidXml(QString xml_file)
 {
