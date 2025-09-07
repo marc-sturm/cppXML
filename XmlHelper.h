@@ -1,13 +1,15 @@
 #ifndef XMLHELPER_H
 #define XMLHELPER_H
 
+#include <QDomDocument>
+
 #include "cppXML_global.h"
 
 ///Helper class for XML handling.
 class CPPXMLSHARED_EXPORT XmlHelper
 {
 public:
-    ///Returns an empty string if the xml file is well-formed, or the error message otherwise. Throws an Exception if the xml file is not ok.
+    ///Returns an empty string if the xml file is well-formed, or the error message otherwise.
     static QString isValidXml(QString xml_file);
 
     ///Returns an empty string if the xml file validates against the schema, or the error message otherwise. Throws an Exception if the schema/xml file are not ok.
@@ -16,9 +18,16 @@ public:
 	///Format XML to make it human-readable
 	static QString format(QString xml);
 
+    ///Load contents of XML file into DOM datastructure
+    static QDomDocument load(QString xml_file);
+
+    ///Parse XML string into DOM datastructure
+    static QDomDocument parse(QByteArray xml_string);
+
 private:
     //declared away
     XmlHelper() = delete;
 };
+
 
 #endif

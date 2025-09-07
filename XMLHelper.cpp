@@ -1,85 +1,64 @@
 #include "XmlHelper.h"
 #include "Helper.h"
-
+#include "VersatileFile.h"
 #include <QUrl>
 #include <QTemporaryFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QTextStream>
 #include <QScopedPointer>
-#include <QDomDocument>
 #include <QRegularExpression>
-
-#include <iostream>
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
 QString XmlHelper::isValidXml(QString xml_file)
 {
-    QFile file(xml_file);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        return QString("Error while opening the file '%1'").arg(xml_file);
-    }
-
 	//special handling for HTML
     if (xml_file.endsWith("html", Qt::CaseInsensitive))
     {
-        QTextStream stream(&file);
-        QString html_content = stream.readAll();
-        file.close();
-        QRegularExpression regex("&[^;]+;"); // ignore special HTML characters
+        //load HTML into string
+        VersatileFile file(xml_file);
+        file.open(QFile::ReadOnly|QFile::Text);
+        QString html_content = file.readAll();
+
+        //ignore special HTML characters
+        QRegularExpression regex("&[^;]+;");
         QByteArray processed = html_content.replace(regex, "").toLatin1();
-        #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
-        QDomDocument doc;
-        QDomDocument::ParseOptions options = QDomDocument::ParseOption::Default;
-        QDomDocument::ParseResult result = doc.setContent(processed, options);
 
-        if (!result.errorMessage.isEmpty())
+        //parse
+        try
         {
-            return "Error parsing HTML at line " + QString::number(result.errorLine) + " column " + QString::number(result.errorColumn) + ": " + result.errorMessage;
+            parse(processed);
+        }
+        catch (Exception& e)
+        {
+            return e.message();
+        }
+    }
+    else
+    {
+        QFile file(xml_file);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            return QString("Error while opening XML file '%1'").arg(xml_file);
         }
 
-        QDomElement root = doc.documentElement();
-        if (root.isNull())
+        QXmlStreamReader xmlReader(&file);
+        while (!xmlReader.atEnd() && !xmlReader.hasError())
         {
-            return "Invalid HTML: missing root element";
+            xmlReader.readNext();
         }
 
-        return "";
-        #else
-        QDomDocument doc;
-        QString error_message;
-        int error_line = 0, error_column = 0;
-
-        // Use the standard setContent() method
-        if (!doc.setContent(processed, &error_message, &error_line, &error_column))
+        if (xmlReader.hasError())
         {
             file.close();
-            return "Error parsing HTML at line " + QString::number(error_line) + ", column " + QString::number(error_column)+ ": " + error_message;
+            return QString("XML parsing error: %1 at line %2, column %3")
+                .arg(xmlReader.errorString())
+                .arg(xmlReader.lineNumber())
+                .arg(xmlReader.columnNumber());
         }
-        else
-        {
-            return "";
-        }
-        #endif
     }
 
-    QXmlStreamReader xmlReader(&file);
-    while (!xmlReader.atEnd() && !xmlReader.hasError())
-    {
-        xmlReader.readNext();
-    }
-
-    if (xmlReader.hasError())
-    {
-        file.close();
-		return QString("XML parsing error: %1 at line %2, column %3")
-        .arg(xmlReader.errorString())
-            .arg(xmlReader.lineNumber())
-            .arg(xmlReader.columnNumber());
-    }
-    file.close();
     return "";
 }
 
@@ -154,4 +133,42 @@ QString XmlHelper::format(QString xml)
 	}
 
 	return xml_out;
+}
+
+QDomDocument XmlHelper::load(QString xml_file)
+{
+    VersatileFile file(xml_file);
+    file.open(QFile::ReadOnly|QFile::Text);
+    return parse(file.readAll());
+}
+
+QDomDocument XmlHelper::parse(QByteArray xml_string)
+{
+    QDomDocument doc;
+
+    //parse
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    QDomDocument::ParseResult result = doc.setContent(xml_string);
+    if (!result.errorMessage.isEmpty())
+    {
+        THROW(ArgumentException, "Error parsing XML at line " + QString::number(result.errorLine) + " column " + QString::number(result.errorColumn) + ": " + result.errorMessage);
+    }
+#else
+    QString error_message;
+    int error_line = 0;
+    int error_column = 0;
+    if (!doc.setContent(processed, &error_message, &error_line, &error_column))
+    {
+        THROW(ArgumentException, "Error parsing XML at line " + QString::number(error_line) + " column " + QString::number(error_column) + ": " + error_message);
+    }
+#endif
+
+    //check for root element
+    QDomElement root = doc.documentElement();
+    if (root.isNull())
+    {
+        THROW(ArgumentException, "Invalid XML: missing root element");
+    }
+
+    return doc;
 }
