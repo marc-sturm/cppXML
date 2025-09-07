@@ -157,7 +157,7 @@ QDomDocument XmlHelper::parse(QByteArray xml_string)
     QString error_message;
     int error_line = 0;
     int error_column = 0;
-    if (!doc.setContent(processed, &error_message, &error_line, &error_column))
+    if (!doc.setContent(xml_string, &error_message, &error_line, &error_column))
     {
         THROW(ArgumentException, "Error parsing XML at line " + QString::number(error_line) + " column " + QString::number(error_column) + ": " + error_message);
     }
