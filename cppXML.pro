@@ -1,38 +1,24 @@
-#c++11 support
-CONFIG += c++11
+include("../lib.pri")
 
 #base settings
 QT       -= gui
-QT       += xml network
-TEMPLATE = lib
+QT       += xml
 TARGET = cppXML
 DEFINES += CPPXML_LIBRARY
-
-#enable O3 optimization
-QMAKE_CXXFLAGS_RELEASE -= -O
-QMAKE_CXXFLAGS_RELEASE -= -O1
-QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE *= -O3
-
-include("../qt_compatibility.pri")
-
-#copy DLL to bin folder
-DESTDIR = $$DEST_DIR_PATH_PART/bin/
 
 #include cppCORE library
 INCLUDEPATH += $$PWD/../cppCORE
 LIBS += -L$$PWD/../../bin -lcppCORE
 
+#include libxml2
 win32: INCLUDEPATH += $$PWD/../../libxml2/include/
 win32: LIBS += -L$$PWD/../../libxml2/libs/ -lxml2
-
 unix: INCLUDEPATH += $$system(pkg-config --cflags libxml-2.0)
 unix: !macx: QMAKE_CXXFLAGS += $$system(pkg-config --cflags libxml-2.0)
 unix: LIBS += -lxml2
 
-#make the executable search for .so-files in the same folder under linux
-QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
+HEADERS += \
+    XMLHelper.h
 
-HEADERS += XMLHelper.h \
-
-SOURCES += XMLHelper.cpp \
+SOURCES += \
+    XMLHelper.cpp
