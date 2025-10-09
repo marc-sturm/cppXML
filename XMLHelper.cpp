@@ -5,7 +5,6 @@
 #include <QTemporaryFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <QTextStream>
 #include <QScopedPointer>
 #include <QRegularExpression>
 #include <libxml/parser.h>
