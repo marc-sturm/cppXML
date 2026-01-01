@@ -10,6 +10,9 @@
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
+
+QList<QPair<int, QString>> XmlHelper::errors = QList<QPair<int, QString>>();
+
 QString XmlHelper::isValidXml(QString xml_file)
 {
 	//special handling for HTML
@@ -61,58 +64,80 @@ QString XmlHelper::isValidXml(QString xml_file)
     return "";
 }
 
+void XmlHelper::schemaErrorHandler(void*, const xmlError* error)
+{
+    if (!error) return;
+
+    qDebug() << error->level << error->line << error->message;
+    if (error->level==XML_ERR_FATAL || error->level==XML_ERR_ERROR)
+    {
+        errors << QPair<int, QString>(error->line, error->message);
+    }
+}
+
 QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
 {
+    //clean up errors
+    errors.clear();
+
     // create schema url (both for native files and files from resources)
     QUrl schema_url;
     QScopedPointer<QTemporaryFile> tmp_file(QTemporaryFile::createNativeFile(schema_file));
-    if (!tmp_file.isNull()) {
+    if (!tmp_file.isNull())
+    {
         schema_url = QUrl::fromLocalFile(tmp_file->fileName());
-    } else {
+    }
+    else
+    {
         schema_url = QUrl::fromLocalFile(schema_file);
     }
 
     // load the schema
-    xmlSchemaParserCtxtPtr schemaParserCtxt = xmlSchemaNewParserCtxt(schema_url.toLocalFile().toUtf8().constData());
-    if (!schemaParserCtxt) {
-        return "Failed to create schema parser context.";
-    }
-
-    xmlSchemaPtr schema = xmlSchemaParse(schemaParserCtxt);
-    xmlSchemaFreeParserCtxt(schemaParserCtxt);
-
-    if (!schema) {
-        return "Failed to parse XSD schema: " + schema_url.toString();
-    }
+    xmlSchemaParserCtxtPtr schema_parser_context = xmlSchemaNewParserCtxt(schema_url.toLocalFile().toUtf8().constData());
+    if (!schema_parser_context) return "Failed to create schema parser context.";
+    xmlSchemaSetParserStructuredErrors(schema_parser_context, schemaErrorHandler, nullptr);
+    xmlSchemaPtr schema = xmlSchemaParse(schema_parser_context);
+    xmlSchemaFreeParserCtxt(schema_parser_context);
+    if (!schema) return "Failed to parse XSD schema: " + schema_url.toString();
 
     // create validation context
-    xmlSchemaValidCtxtPtr schemaValidCtxt = xmlSchemaNewValidCtxt(schema);
-    if (!schemaValidCtxt) {
+    xmlSchemaValidCtxtPtr schema_validation_context = xmlSchemaNewValidCtxt(schema);
+    if (!schema_validation_context)
+    {
         xmlSchemaFree(schema);
         return "Failed to create schema validation context.";
     }
+    xmlSchemaSetValidStructuredErrors(schema_validation_context, schemaErrorHandler, nullptr);
 
     // load the XML file
-    xmlDocPtr xmlDoc = xmlReadFile(xml_name.toUtf8().constData(), NULL, XML_PARSE_NONET);
-    if (!xmlDoc) {
-        xmlSchemaFreeValidCtxt(schemaValidCtxt);
+    xmlDocPtr xml_doc = xmlReadFile(xml_name.toUtf8().constData(), NULL, XML_PARSE_NONET);
+    if (!xml_doc)
+    {
         xmlSchemaFree(schema);
+        xmlSchemaFreeValidCtxt(schema_validation_context);
         return "Failed to parse XML file: " + xml_name;
     }
 
     // validate XML
-    int validationResult = xmlSchemaValidateDoc(schemaValidCtxt, xmlDoc);
+    int validation_result = xmlSchemaValidateDoc(schema_validation_context, xml_doc);
 
     // cleanup
-    xmlFreeDoc(xmlDoc);
-    xmlSchemaFreeValidCtxt(schemaValidCtxt);
+    xmlFreeDoc(xml_doc);
+    xmlSchemaFreeValidCtxt(schema_validation_context);
     xmlSchemaFree(schema);
 
-    if (validationResult == 0) {
-        return ""; // validation successful, no errors found
-    } else {
-        return "XML validation failed against schema: " + schema_url.toString();
+    if (validation_result!=0)
+    {
+        QStringList text;
+        text << "XML validation failed against schema:";
+        foreach(auto entry, errors)
+        {
+            text << "Line " + QString::number(entry.first) + ": " + entry.second.trimmed() + "\n";
+        }
+        return text.join("\n");
     }
+
+    return ""; // validation successful, no errors found
 }
 
 QString XmlHelper::format(QString xml)

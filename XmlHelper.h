@@ -2,8 +2,8 @@
 #define XMLHELPER_H
 
 #include <QDomDocument>
-
 #include "cppXML_global.h"
+#include "libxml/xmlerror.h"
 
 ///Helper class for XML handling.
 class CPPXMLSHARED_EXPORT XmlHelper
@@ -27,6 +27,10 @@ public:
 private:
     //declared away
     XmlHelper() = delete;
+
+    //error handler
+    static QList<QPair<int, QString>> errors;
+    static void schemaErrorHandler(void*, const xmlError* error);
 };
 
 
