@@ -80,6 +80,9 @@ QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
     //clean up errors
     errors.clear();
 
+	//check XML file exists
+	if (!QFile::exists(xml_name)) return "XML file does not exist: " + xml_name;
+
     // create schema url (both for native files and files from resources)
     QUrl schema_url;
     QScopedPointer<QTemporaryFile> tmp_file(QTemporaryFile::createNativeFile(schema_file));
