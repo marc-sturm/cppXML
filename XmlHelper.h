@@ -30,7 +30,8 @@ private:
 
     //error handler
     static QList<QPair<int, QString>> errors;
-    static void schemaErrorHandler(void*, const xmlError* error);
+	static void schemaErrorHandler(void*, const xmlError* error);
+	static void parseErrorHandler(void *userData, const xmlError* error);
 };
 
 

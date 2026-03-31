@@ -68,11 +68,24 @@ void XmlHelper::schemaErrorHandler(void*, const xmlError* error)
 {
     if (!error) return;
 
-    qDebug() << error->level << error->line << error->message;
+	qDebug() << "SCHEMA ERROR: " << error->level << error->line << error->message;
     if (error->level==XML_ERR_FATAL || error->level==XML_ERR_ERROR)
     {
         errors << QPair<int, QString>(error->line, error->message);
     }
+}
+
+
+void XmlHelper::parseErrorHandler(void*, const xmlError* error)
+{
+	if (!error) return;
+
+	qDebug() << "PARSE ERROR: " << error->level << error->line << error->message;
+
+	if (error->level==XML_ERR_FATAL || error->level==XML_ERR_ERROR)
+	{
+		errors << QPair<int, QString>(error->line, error->message);
+	}
 }
 
 QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
@@ -110,15 +123,22 @@ QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
         xmlSchemaFree(schema);
         return "Failed to create schema validation context.";
     }
-    xmlSchemaSetValidStructuredErrors(schema_validation_context, schemaErrorHandler, nullptr);
+	xmlSetStructuredErrorFunc(nullptr, parseErrorHandler);
+	xmlSchemaSetValidStructuredErrors(schema_validation_context, schemaErrorHandler, nullptr);
 
     // load the XML file
     xmlDocPtr xml_doc = xmlReadFile(xml_name.toUtf8().constData(), NULL, XML_PARSE_NONET);
     if (!xml_doc)
     {
         xmlSchemaFree(schema);
-        xmlSchemaFreeValidCtxt(schema_validation_context);
-        return "Failed to parse XML file: " + xml_name;
+		xmlSchemaFreeValidCtxt(schema_validation_context);
+		QStringList text;
+		text << "XML file could not be parsed:\n";
+		foreach(auto entry, errors)
+		{
+			text << "Line " + QString::number(entry.first) + ": " + entry.second.trimmed();
+		}
+		return text.join("\n");
     }
 
     // validate XML
@@ -132,10 +152,10 @@ QString XmlHelper::isValidXml(QString xml_name, QString schema_file)
     if (validation_result!=0)
     {
         QStringList text;
-        text << "XML validation failed against schema:";
+		text << "XML validation failed against schema:";
         foreach(auto entry, errors)
         {
-            text << "Line " + QString::number(entry.first) + ": " + entry.second.trimmed() + "\n";
+			text << "Line " + QString::number(entry.first) + ": " + entry.second.trimmed();
         }
         return text.join("\n");
     }
