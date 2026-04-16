@@ -30,8 +30,14 @@ private:
 
     //error handler
     static QList<QPair<int, QString>> errors;
+
+#if LIBXML_VERSION >= 21000
 	static void schemaErrorHandler(void*, const xmlError* error);
 	static void parseErrorHandler(void *userData, const xmlError* error);
+#else
+	static void schemaErrorHandler(void*, xmlError* error);
+	static void parseErrorHandler(void *userData, xmlError* error);
+#endif
 };
 
 

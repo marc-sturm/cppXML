@@ -64,7 +64,11 @@ QString XmlHelper::isValidXml(QString xml_file)
     return "";
 }
 
+#if LIBXML_VERSION >= 21000
 void XmlHelper::schemaErrorHandler(void*, const xmlError* error)
+#else
+void XmlHelper::schemaErrorHandler(void*, xmlError* error)
+#endif
 {
     if (!error) return;
 
@@ -75,8 +79,11 @@ void XmlHelper::schemaErrorHandler(void*, const xmlError* error)
     }
 }
 
-
+#if LIBXML_VERSION >= 21000
 void XmlHelper::parseErrorHandler(void*, const xmlError* error)
+#else
+void XmlHelper::parseErrorHandler(void*, xmlError* error)
+#endif
 {
 	if (!error) return;
 
